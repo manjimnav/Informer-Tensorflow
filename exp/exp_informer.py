@@ -71,7 +71,6 @@ class ExpInformer():
     def train(self, setting):
         train_data = self._get_data(flag='train')
         valid_data = self._get_data(flag='val')
-        test_data = self._get_data(flag='test')
 
         train_steps = len(train_data)
         valid_steps = len(valid_data)
@@ -90,4 +89,13 @@ class ExpInformer():
                        callbacks=[early_stopping],
                        epochs=self.args.train_epochs)
 
+        self.model.save('../checkpoints/model.h5')
+
         return self.model
+
+    def test(self, setting):
+        test_data = self._get_data(flag='test')
+
+        loss, mse, mae = self.model.evaluate_generator(test_data.get_dataset(), len(test_data))
+
+        print('mse:{}, mae:{}'.format(mse, mae))
