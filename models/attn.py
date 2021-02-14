@@ -13,6 +13,7 @@ class FullAttention(Layer):
         self.mask_flag = mask_flag
         self.dropout = tf.keras.layers.Dropout(attention_dropout)
 
+
     def call(self, inputs, attn_mask=None):
         queries, keys, values = inputs
         B, L, H, E = queries.shape
@@ -133,6 +134,7 @@ class AttentionLayer(Layer):
 
         d_keys = d_keys or (d_model//n_heads)
         d_values = d_values or (d_model//n_heads)
+        self.d_model = d_model
 
         self.inner_attention = attention
         self.query_projection = tf.keras.layers.Dense(d_keys * n_heads)
@@ -141,18 +143,35 @@ class AttentionLayer(Layer):
         self.out_projection = tf.keras.layers.Dense(d_model)
         self.n_heads = n_heads
 
+    def build(self, input_shape):
+        print(input_shape)
+        B, L, _ = input_shape[0]
+        _, S, _ = input_shape[1]
+        H = self.n_heads
+
+        self.queries = self.add_weight(shape=(B, L, H, self.d_model),
+                                 initializer='random_normal',
+                                 trainable=True)
+
+        self.keys = self.add_weight(shape=(B, S, H, self.d_model),
+                                       initializer='random_normal',
+                                       trainable=True)
+
+        self.values = self.add_weight(shape=(B, S, H, self.d_model),
+                                       initializer='random_normal',
+                                       trainable=True)
+
     def call(self, inputs, attn_mask=None):
         queries, keys, values = inputs
-
         B, L, _ = queries.shape
         _, S, _ = keys.shape
         H = self.n_heads
 
-        queries = tf.reshape(self.query_projection(queries), (B, L, H, -1))
-        keys = tf.reshape(self.key_projection(keys), (B, S, H, -1))
-        values = tf.reshape(self.value_projection(values), (B, S, H, -1))
+        self.queries = tf.reshape(self.query_projection(queries), (B, L, H, -1))
+        self.keys = tf.reshape(self.key_projection(keys), (B, S, H, -1))
+        self.values = tf.reshape(self.value_projection(values), (B, S, H, -1))
 
-        out = tf.reshape(self.inner_attention([queries, keys, values], attn_mask = attn_mask), (B, L, -1))
+        out = tf.reshape(self.inner_attention([self.queries, self.keys, self.values], attn_mask=attn_mask), (B, L, -1))
 
         return self.out_projection(out)
 

@@ -1,8 +1,8 @@
 import tensorflow as tf
-from .embed import DataEmbedding
-from .attn import ProbAttention, FullAttention, AttentionLayer
-from .encoder import ConvLayer, Encoder, EncoderLayer
-from .decoder import Decoder, DecoderLayer
+from embed import DataEmbedding
+from attn import ProbAttention, FullAttention, AttentionLayer
+from encoder import ConvLayer, Encoder, EncoderLayer
+from decoder import Decoder, DecoderLayer
 
 
 class Informer(tf.keras.Model):
@@ -84,9 +84,9 @@ class Informer(tf.keras.Model):
 
 
 if __name__ == '__main__':
-    model = Informer(7, 7, 7, 3)
+    model = Informer(7, 7, 7, 96, 48, 24, 32)
     x_enc = tf.zeros((32, 96, 7))
-    x_dec = tf.zeros((32, 96, 7))
+    x_dec = tf.zeros((32, 72, 7))
     x_mark_enc = tf.zeros((32, 96, 4))
-    x_mark_dec = tf.zeros((32, 96, 4))
+    x_mark_dec = tf.zeros((32, 72, 4))
     print(model([x_enc, x_dec, x_mark_enc, x_mark_dec]).shape)

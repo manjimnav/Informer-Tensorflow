@@ -107,8 +107,3 @@ class DataEmbedding(Layer):
         x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
 
         return self.dropout(x)
-
-if __name__ == '__main__':
-    emb = DataEmbedding(7, 128)
-
-    print(emb(tf.zeros((32,10,7)), x_mark=tf.zeros((32,10,4))).shape)

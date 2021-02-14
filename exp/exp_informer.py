@@ -89,7 +89,7 @@ class ExpInformer():
                        callbacks=[early_stopping],
                        epochs=self.args.train_epochs)
 
-        self.model.save('../checkpoints/model.h5')
+        self.model.save_weights('../checkpoints/model.h5')
 
         return self.model
 

@@ -129,15 +129,7 @@ class DatasetETT:
         if self.shuffle:
             dataset = dataset.shuffle(self.batch_size)
 
-        x_enc_shape = (self.seq_len, self.data_x.shape[1])
-        x_dec_shape = (self.label_len + self.pred_len, self.data_x.shape[1])
-        x_enc_mark_shape = (self.seq_len, self.data_stamp.shape[1])
-        x_dec_mark_shape = (self.label_len + self.pred_len, self.data_stamp.shape[1])
-
-        y_shape = (self.pred_len, self.data_x.shape[1])
-
-        dataset = dataset.batch(self.batch_size).repeat()
-
+        dataset = dataset.batch(self.batch_size, drop_remainder=self.drop_last).repeat()
 
         return dataset.prefetch(5)
 
@@ -145,14 +137,3 @@ class DatasetETT:
         return (len(self.data_x) - self.seq_len - self.pred_len + 1)//self.batch_size
 
 
-if __name__ == '__main__':
-
-    ett_dataset = DatasetETT(root_path='/home/manuelj/Repositories/Informer-Tensorflow/data/ETT',
-                                 shuffle=False, size=[5, 2, 1], batch_size=2).get_dataset()
-    (x_enc, x_dec, x_mark_enc, x_mark_dec), y = list(ett_dataset.take(1).as_numpy_iterator())[0]
-
-    print(x_enc.set_shape((2, 5, 7)).shape)
-    print(x_dec)
-    print(x_mark_enc)
-    print(x_mark_dec)
-    print(y)
