@@ -74,7 +74,11 @@ class ExpInformer():
 
         train_steps = len(train_data)
         valid_steps = len(valid_data)
-        early_stopping = tf.keras.callbacks.EarlyStopping(patience=self.args.patience)
+        early_stopping = tf.keras.callbacks.EarlyStopping(patience=self.args.patience, restore_best_weights=True)
+
+        checkpoint_path = f'./checkpoints/{setting}'
+        if not os.path.exists(checkpoint_path):
+            os.makedirs(checkpoint_path)
 
         model_optim = self._select_optimizer()
         loss = tf.keras.losses.mse
@@ -89,7 +93,7 @@ class ExpInformer():
                        callbacks=[early_stopping],
                        epochs=self.args.train_epochs)
 
-        self.model.save_weights('../checkpoints/model.h5')
+        self.model.save_weights(checkpoint_path+'/model.h5')
 
         return self.model
 

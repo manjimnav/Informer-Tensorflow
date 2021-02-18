@@ -96,9 +96,12 @@ class ProbAttention(Layer):
             scores = (scores * attn_mask.mask) + (-((attn_mask.mask * num + num) - num))
 
         attn = tf.keras.activations.softmax(scores, axis=-1)  # nn.Softmax(dim=-1)(scores)
+        batch_indexes = tf.tile(tf.range(V.shape[0])[:, tf.newaxis, tf.newaxis], (1, V.shape[1], index.shape[-1]))
+        head_indexes = tf.tile(tf.range(V.shape[1])[tf.newaxis, :, tf.newaxis], (V.shape[0], 1, index.shape[-1]))
 
-        context_in = context_in.numpy()
-        context_in[np.arange(B)[:, None, None], np.arange(H)[None, :, None], index, :] = tf.matmul(attn, V).numpy()
+        idx = tf.stack(values=[batch_indexes, head_indexes, index], axis=-1)
+
+        context_in = tf.tensor_scatter_nd_update(context_in, idx, tf.matmul(attn, V))
 
         return tf.convert_to_tensor(context_in)
 
